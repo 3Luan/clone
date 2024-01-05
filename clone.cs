@@ -560,3 +560,134 @@ private void btnInBaoCao_Click(object sender, EventArgs e)
     fRpt.crystalReportViewer1.ReportSource = rpt;
     fRpt.ShowDialog();
 }
+
+
+
+
+
+////////////////////////// datagrigview ////////////////////////////
+
+using System;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
+using Form_Rpt = CrystalDecisions.CrystalReports.Engine;
+
+
+namespace WindowsFormsProduct2
+{
+    public partial class Form1 : Form
+    {
+        U_ProductsEntities db = new U_ProductsEntities();
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btnXem_Click(object sender, EventArgs e)
+        {
+            //dgvSanPham.DataSource = db.Products.Select(p => new { Code = p.ProductCode, Name = p.ProductName, Price = p.ProductPrice }).ToList();
+
+            dgvSanPham.DataSource = db.Products.ToList();
+            dgvSanPham.Columns[0].ReadOnly = true;
+        }
+
+        private void btnThem_Click(object sender, EventArgs e)
+        {
+            Product p = new Product();
+            p.ProductName = "USB 32GB";
+            p.ProductPrice = 1200000;
+            p.CatalogCode = 3;
+            db.Products.Add(p);
+            db.SaveChanges();
+            btnXem_Click(sender, e);
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            //int pCode =Convert.ToInt32(dgv_SP.SelectedCells[0].OwningRow.Cells["ProductCode"].Value.ToString());
+            int pCode = Convert.ToInt32(dgvSanPham.Rows[dgvSanPham.CurrentRow.Index].Cells["ProductCode"].Value.ToString());
+
+            Product selectedProduct = db.Products.Where(p => p.ProductCode == pCode).SingleOrDefault();
+
+            db.Products.Remove(selectedProduct);
+            db.SaveChanges();
+            btnXem_Click(sender, e);
+        }
+
+        private void btnSua_Click(object sender, EventArgs e)
+        {
+            DataGridViewRow selectedRow = dgvSanPham.Rows[dgvSanPham.CurrentRow.Index];
+
+            int code = Convert.ToInt32(selectedRow.Cells["ProductCode"].Value);
+
+            Product selectedProduct = db.Products.Find(code);
+
+            selectedProduct.ProductName = selectedRow.Cells["ProductName"].Value.ToString();
+            selectedProduct.ProductPrice = float.Parse(selectedRow.Cells["ProductPrice"].Value.ToString());
+
+            db.SaveChanges();
+            btnXem_Click(sender, e);
+        }
+
+        private void btnXuatExcel_Click(object sender, EventArgs e)
+        {
+            Excel.Application excelApp = new Excel.Application();
+            Excel.Workbook excelWb = excelApp.Workbooks.Add(Excel.XlWBATemplate.xlWBATWorksheet);
+            Excel.Worksheet excelWs = excelWb.Worksheets[1];
+
+            Excel.Range excelRange = excelWs.Cells[1, 1];
+            excelRange.Font.Size = 16;
+            excelRange.Font.Bold = true;
+            excelRange.Font.Color = Color.Blue;
+            excelRange.Value = "DANH MỤC SẢN PHẨM";
+
+            // Lấy danh mục
+            var catalogs = db.Catalogs.Select(c => new { Code = c.CatalogCode, Name = c.CatalogName }).ToList();
+            int row = 2;
+            foreach (var c in catalogs)
+            {
+                excelWs.Range["A" + row].Font.Bold = true; excelWs.Range["A" + row].Value = c.Name;
+                row++;
+                // Lấy sp theo danh mục
+                var products = from p in db.Products where p.CatalogCode == c.Code select p;
+                foreach (var p in products)
+                {
+                    excelWs.Range["A" + row].Value = p.ProductCode;
+                    excelWs.Range["B" + row].ColumnWidth = 50;
+                    excelWs.Range["B" + row].Value = p.ProductName;
+                    excelWs.Range["C" + row].Value = p.ProductPrice;
+                    row++;
+                }
+            }
+
+            excelWs.Name = "DanhMucSanPham"; excelWb.Activate();
+            // Luu file
+            SaveFileDialog saveFileDialog = new SaveFileDialog(); if (saveFileDialog.ShowDialog() == DialogResult.OK) excelWb.SaveAs(saveFileDialog.FileName);
+            excelApp.Quit();
+        }
+
+        private void btnInBaoCao_Click(object sender, EventArgs e)
+        {
+            // Chuẩn bị nguồn dữ liệu
+            var data = db.Products.Select(p => new {
+                ProductCode = p.ProductCode,
+                ProductName = p.ProductName,
+                ProductPrice = p.ProductPrice,
+                CatalogCode = p.Catalog.CatalogCode,
+                CatalogName = p.Catalog.CatalogName
+            }).ToList();
+
+            // Gán nguồn dữ liệu cho CrystalReport
+            CrystalReport1 rpt = new CrystalReport1();
+            rpt.SetDataSource(data);
+
+            // Hiển thị báo cáo
+            Form2 fRpt = new Form2();
+            fRpt.crystalReportViewer1.ReportSource = rpt;
+            fRpt.ShowDialog();
+        }
+    }
+}
