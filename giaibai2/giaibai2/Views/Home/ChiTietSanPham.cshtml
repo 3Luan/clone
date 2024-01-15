@@ -1,0 +1,107 @@
+﻿@model giaibai2.Models.SanPham
+
+@{
+    ViewBag.Title = "ChiTietSanPham";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>ChiTietSanPham</h2>
+
+<div>
+    <h4>SanPham</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.TenSanPham)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TenSanPham)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.GiaNhap)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.GiaNhap)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DonGiaBanNhoNhat)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DonGiaBanNhoNhat)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.DonGiaBanLonNhat)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.DonGiaBanLonNhat)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.TrangThai)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.TrangThai)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.MoTaNgan)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.MoTaNgan)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.AnhDaiDien)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.AnhDaiDien)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.NoiBat)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.NoiBat)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PhanLoai.PhanLoaiChinh)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PhanLoai.PhanLoaiChinh)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.PhanLoaiPhu.TenPhanLoaiPhu)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.PhanLoaiPhu.TenPhanLoaiPhu)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+
+    <div class="form-actions no-color">
+        <input type="submit" value="Delete" class="btn btn-default" /> |
+        @Html.ActionLink("Sửa", "SuaSanPham", new { id = Model.MaSanPham }) |
+        @Html.ActionLink("Back to List", "Index")
+    </div>
+    }
+</p>
