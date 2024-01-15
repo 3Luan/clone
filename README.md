@@ -1,3 +1,136 @@
+x
+x
+x
+x
+x
+xx
+x
+xx
+x
+x
+xx
+x
+x
+x
+
+////////////////////////////////////////////
+
+-	Tạo action lấy sản phẩm theo từng mã phân loại (phụ), code tự gõ
+       public ActionResult GetProductsByCategory(string cateId) 
+       { 
+           var products = db.SanPhams.Where(p => p.MaPhanLoaiPhu == cateId).ToList();
+
+           // tránh lỗi tham chiếu vòng tròn
+           var _products = products.Select(p => new
+           {
+               MaSanPham = p.MaSanPham,
+               TenSanPham = p.TenSanPham,
+               MaPhanLoai = p.MaPhanLoai,
+               GiaNhap = p.GiaNhap,
+               DonGiaBanNhoNhat = p.DonGiaBanNhoNhat,
+               DonGiaBanLonNhat = p.DonGiaBanLonNhat,
+               TrangThai = p.TrangThai,
+               MoTaNgan = p.MoTaNgan,
+               AnhDaiDien = p.AnhDaiDien,
+               NoiBat = p.NoiBat,
+               MaPhanLoaiPhu = p.MaPhanLoaiPhu,
+           }).ToList();
+
+           return Json(new { products = _products }, JsonRequestBehavior.AllowGet);
+       }
+
+-	Thêm id cho thẻ html chứa các sản phẩm, tự gõ
+ 
+-	Nhớ thêm type
+ 
+
+-	Trong view Index, tạo hàm sự kiện sử dụng ajax để lấy danh sách sản phẩm theo mã phân loại phụ, tự gõ
+@* phải có dòng này mới sài được ajax *@
+@Scripts.Render("~/Content/template/vendor/jquery/jquery-3.2.1.min.js")
+
+<script>
+
+    // hàm sự kiện js khi chọn phân loại
+    function chooseCategory(cateId) {
+    $.ajax({
+        url: '@Url.Action("GetProductsByCategory", "Home")',
+        method: 'GET',
+        dataType: 'json',
+        data: { cateId: cateId },
+        success: function (data) {
+
+            /*
+               mình phải lấy data.products vì trong action, danh sách sản phẩm trả về có tên: products
+            */
+           // truyền danh sách này tới hàm load sản phẩm
+            loadSP(data.products)
+        },
+        error: function (err) {
+            console.log(err)
+        }
+    })
+}</script>
+
+-	Lưu ý:
+  
+-	Tạo hàm js load sản phẩm lên view
+Lưu ý: biến str = `` chứ không phải str = ''
+// hàm load sản phẩm lên view
+function loadSP(sanPhams) {
+
+    // lấy thẻ html chứa các sản phẩm
+    var spContainer = document.querySelector('#sp-container');
+
+    // xóa hết sản phẩm trước đó
+    spContainer.innerHTML = '';
+
+    // str để lưu code html của các sản phẩm
+    let str = ``;
+
+    /*
+        duyệt qua các sản phẩm, mỗi sản phẩm là 1 thẻ html, cộng hết vào biến str, nhớ đổi giá trị của sản phẩm
+    */
+    for (let p of sanPhams) {
+        str += `<div class="col-sm-6 col-md-4 col-lg-3 p-b-35 isotope-item women">
+                    <div class="block2">
+                        <div class="block2-pic hov-img0">
+                            <img src="/Content/Images QLQuanAo/${p.AnhDaiDien}" alt="IMG-PRODUCT">
+
+                            <a href="#" class="block2-btn flex-c-m stext-103 cl2 size-102 bg0 bor2 hov-btn1 p-lr-15 trans-04 ">
+                                Quick View
+                            </a>
+                        </div>
+
+                        <div class="block2-txt flex-w flex-t p-t-14">
+                            <div class="block2-txt-child1 flex-col-l ">
+                                <a href="product-detail.html" class="stext-104 cl4 hov-cl1 trans-04 js-name-b2 p-b-6">
+                                    ${p.TenSanPham}
+                                </a>
+
+                                <span class="stext-105 cl3">
+                                    $${p.DonGiaBanNhoNhat}
+                                </span>
+                            </div>
+
+                            <div class="block2-txt-child2 flex-r p-t-3">
+                                <a href="#" class="btn-addwish-b2 dis-block pos-relative js-addwish-b2">
+                                    <img class="icon-heart1 dis-block trans-04" src="/Content/template/images/icons/icon-heart-01.png" alt="ICON">
+                                    <img class="icon-heart2 dis-block trans-04 ab-t-l" src="/Content/template/images/icons/icon-heart-02.png" alt="ICON">
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>`
+    }
+
+    // đưa str vào thẻ html chứa các sản phẩm
+    $('#sp-container').html(str);
+}
+
+
+
+////////////////////////////////////
+
 @RenderPage("Header.cshtml");
 
 <div class="container body-content">
